@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Akka.Restaurant": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

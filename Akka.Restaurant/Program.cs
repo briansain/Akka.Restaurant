@@ -2,6 +2,7 @@
 using Akka.Hosting;
 using Akka.Logger.Serilog;
 using Akka.Restaurant.Actors;
+using Akka.Restaurant.Actors.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -27,10 +28,12 @@ namespace Akka.Restaurant
                             configLoggers.ClearLoggers();
                             configLoggers.AddLogger<SerilogLogger>();
                         })
-                        .WithActors((actorSystem, registry) =>
+                        .WithActors((actorSystem, registry, dependencyInj) =>
                         {
-                            var echoActor = actorSystem.ActorOf(Props.Create<EchoActor>(), "echo-actor");
-                            registry.Register<EchoActor>(echoActor);
+                            var serverManager = actorSystem.ActorOf(dependencyInj.Props<ServerManager>(), "server-manager");
+                            registry.Register<ServerManager>(serverManager);
+                            var hostessActor = actorSystem.ActorOf(dependencyInj.Props<HostessActor>(), "hostess-actor");
+                            registry.Register<HostessActor>(hostessActor);
                         });
                     });
                     services.AddHostedService<AkkaHostedService>();
