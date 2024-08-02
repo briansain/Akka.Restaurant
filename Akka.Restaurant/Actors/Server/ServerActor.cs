@@ -20,10 +20,20 @@ namespace Akka.Restaurant.Actors.Server
             {
                 _logger.Info($"{ServerName} has been assigned Table {msg.TableId}");
                 TableIds.Add(msg.TableId, new TableState(msg.TableId, msg.NewCustomers.CustomerId));
-                var custActor = Context.System.ActorSelection($"/user/customer-{msg.NewCustomers.CustomerId}");
+                var custActor = GetCustomerReference(msg.NewCustomers.CustomerId);
                 custActor.Tell(new ServerGreeting(ServerName));
+                Context.System.Scheduler.ScheduleTellOnce(TimeSpan.FromSeconds(3), custActor, new RequestDrinkOrder(), Self);
+            });
+            Receive<DrinkOrder>(msg =>
+            {
+                Context.System.Scheduler.ScheduleTellOnce(TimeSpan.FromSeconds(3), Sender, new Drinks(), Self);
             });
             _logger = Context.GetLogger();
+        }
+
+        public ActorSelection GetCustomerReference(Guid customerId)
+        {
+            return Context.System.ActorSelection($"/user/customer-{customerId}");
         }
     }
 

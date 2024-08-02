@@ -59,7 +59,7 @@ namespace Akka.Restaurant.Actors.Server
 
         public string GetServerName()
         {
-            var index = Random.Shared.Next(0, serverNames.Count);
+            var index = Random.Shared.Next(0, serverNames.Count - 1);
             return serverNames[index];
         }
 
