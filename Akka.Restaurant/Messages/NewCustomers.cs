@@ -9,5 +9,6 @@ namespace Akka.Restaurant.Messages
     internal class NewCustomers
     {
         public int NumberOfCustomers { get; set; }
+        public Guid CustomerId { get; set; }
     }
 }
