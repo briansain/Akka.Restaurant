@@ -1,4 +1,4 @@
-﻿namespace Akka.Restaurant.Messages
+﻿namespace Akka.Restaurant.Messages.DrinksWorkflow
 {
     internal class DrinkOrder
     {

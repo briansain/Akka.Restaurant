@@ -1,6 +1,7 @@
 ﻿#pragma warning disable AK1003 // ReceiveAsync<T>() or ReceiveAnyAsync<T>() message handler without async lambda body
 
 using Akka.Actor;
+using Akka.DependencyInjection;
 using Akka.Dispatch.SysMsg;
 using Akka.Event;
 using Akka.Restaurant.Messages;
@@ -29,9 +30,12 @@ namespace Akka.Restaurant.Actors.Server
         ];
         public ServerManager()
         {
-            var server1 = Context.ActorOf(Props.Create<ServerActor>(GetServerName()), "server-1"); //{[akka://restaurant-service/user/server-manager/server-1#337002186]}
+            var di = DependencyResolver.For(Context.System);
+            var serverGuid1 = Guid.NewGuid();
+            var server1 = Context.ActorOf(di.Props<ServerActor>(GetServerName()), $"server-{serverGuid1}"); //{[akka://restaurant-service/user/server-manager/server-1#337002186]}
             Context.Watch(server1);
-            var server2 = Context.ActorOf(Props.Create<ServerActor>(GetServerName()), "server-2");
+            var serverGuid2 = Guid.NewGuid();
+            var server2 = Context.ActorOf(di.Props<ServerActor>(GetServerName()), $"server-{serverGuid2}");
             Context.Watch(server2);
 
             _logger = Context.GetLogger();

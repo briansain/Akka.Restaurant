@@ -1,0 +1,19 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Akka.Restaurant.Messages.FoodWorkflow
+{
+    internal class RequestFoodOrder
+    {
+        public List<string> Menu =
+        [
+            "Cheeseburger",
+            "Lasgna",
+            "Cookies",
+            "Burritos"
+        ];
+    }
+}

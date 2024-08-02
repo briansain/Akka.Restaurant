@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Akka.Restaurant.Messages
 {
-    internal class Drinks
+    internal class RequestCookStatus
     {
     }
 }

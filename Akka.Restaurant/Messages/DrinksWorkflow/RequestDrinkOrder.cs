@@ -4,15 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Akka.Restaurant.Messages
+namespace Akka.Restaurant.Messages.DrinksWorkflow
 {
     internal class RequestDrinkOrder
     {
-        public List<string> AvailableDrinks =
+        public List<string> DrinkMenu =
         [
             "Water",
             "Mud Water",
-            "Bubbly Water", 
+            "Bubbly Water",
             "Kool-aid"
         ];
     }

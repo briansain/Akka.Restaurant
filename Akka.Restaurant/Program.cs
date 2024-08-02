@@ -2,6 +2,7 @@
 using Akka.Hosting;
 using Akka.Logger.Serilog;
 using Akka.Restaurant.Actors;
+using Akka.Restaurant.Actors.Cooks;
 using Akka.Restaurant.Actors.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -34,6 +35,8 @@ namespace Akka.Restaurant
                             registry.Register<ServerManager>(serverManager);
                             var hostessActor = actorSystem.ActorOf(dependencyInj.Props<HostessActor>(), "hostess-actor");
                             registry.Register<HostessActor>(hostessActor);
+                            var cookManager = actorSystem.ActorOf(dependencyInj.Props<CookManager>(), "cook-manager");
+                            registry.Register<CookManager>(cookManager);
                         });
                     });
                     services.AddHostedService<AkkaHostedService>();
