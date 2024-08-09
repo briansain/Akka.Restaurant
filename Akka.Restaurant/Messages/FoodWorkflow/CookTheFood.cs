@@ -11,14 +11,12 @@ namespace Akka.Restaurant.Messages.FoodWorkflow
         public string FoodToCook { get; set; }
         public Guid OrderId { get; set; }
         public Guid ServerId { get; set; }
-        public Guid FoodId { get; set; }
 
-        public CookTheFood(string foodToCook, Guid orderId, Guid serverId, Guid foodId)
+        public CookTheFood(string foodToCook, Guid orderId, Guid serverId)
         {
             FoodToCook = foodToCook;
             OrderId = orderId;
             ServerId = serverId;
-            FoodId = foodId;
         }
     }
 }

@@ -34,11 +34,7 @@ namespace Akka.Restaurant.Actors.Cooks
             {
                 _logger.Debug($"Cooking the food");
                 Become(Cooking);
-                if (BacklogOfFood.Contains(msg))
-                {
-                    BacklogOfFood.Remove(msg);
-                }
-                Context.System.Scheduler.ScheduleTellOnce(TimeSpan.FromSeconds(4), Self, new FoodIsCooked(msg.OrderId, msg.FoodId, msg.ServerId, msg.FoodToCook), Self);
+                Context.System.Scheduler.ScheduleTellOnce(TimeSpan.FromSeconds(4), Self, new FoodIsCooked(msg.OrderId, msg.ServerId, msg.FoodToCook), Self);
             });
         }
 
@@ -60,7 +56,9 @@ namespace Akka.Restaurant.Actors.Cooks
                 Become(Waiting);
                 if (BacklogOfFood.Count > 0)
                 {
-                    Self.Tell(BacklogOfFood[0]);
+                    var food = BacklogOfFood[0];
+                    BacklogOfFood.Remove(food);
+                    Self.Tell(food);
                 }
             });
         }

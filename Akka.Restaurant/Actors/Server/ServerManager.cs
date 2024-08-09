@@ -37,11 +37,11 @@ namespace Akka.Restaurant.Actors.Server
             var serverGuid2 = Guid.NewGuid();
             var server2 = Context.ActorOf(di.Props<ServerActor>(GetServerName()), $"server-{serverGuid2}");
             Context.Watch(server2);
-
             _logger = Context.GetLogger();
 
             Receive<AssignTable>(msg =>
             {
+                _logger.Debug($"Query for num assigned tables");
                 var askTasks = new List<Task<NumAssignedTablesResponse>>();
                 foreach (var child in Context.GetChildren())
                 {
@@ -50,13 +50,13 @@ namespace Akka.Restaurant.Actors.Server
 
                 Task.WaitAll(askTasks.ToArray());
                 var assignedActor = askTasks.OrderBy(a => a.Result.NumAssignedTables).FirstOrDefault();
-                _logger.Debug($"Assigned table {msg.TableId}");
                 if (assignedActor == null)
                 {
                     Context.GetLogger().Error($"Could not get any assigned actors");
                     throw new Exception();
                 }
-
+                
+                _logger.Debug($"Assigned table {msg.TableId}");
                 assignedActor.Result.Self.Tell(msg);
             });
         }

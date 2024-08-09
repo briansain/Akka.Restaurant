@@ -10,7 +10,7 @@ namespace Akka.Restaurant.Actors
     {
         public int CountOfPeople { get; set; }
         public Guid CustomerId { get; set; }
-        public ILoggingAdapter _logger { get;set; }
+        public ILoggingAdapter _logger { get; set; }
         public CustomerActor(int countOfPeople, Guid customerId)
         {
             CountOfPeople = countOfPeople;
@@ -20,7 +20,6 @@ namespace Akka.Restaurant.Actors
             Receive<ServerGreeting>(msg =>
             {
                 _logger.Info($"Received Server Greeting from {msg.ServerName}");
-                // Do nothing??
             });
             Receive<RequestDrinkOrder>(msg =>
             {
@@ -31,7 +30,6 @@ namespace Akka.Restaurant.Actors
             Receive<Drinks>(msg =>
             {
                 _logger.Info($"Received my/our drinks");
-                // Do nothing??
             });
             Receive<RequestFoodOrder>(msg =>
             {
@@ -41,6 +39,26 @@ namespace Akka.Restaurant.Actors
             Receive<FoodOrderDelivery>(msg =>
             {
                 _logger.Info($"Food Order was Delivered");
+            });
+            Receive<RequestDessertOrder>(msg =>
+            {
+                var rando = Random.Shared.Next(20);
+                if (rando % 2 == 0)
+                {
+                    _logger.Info($"Ordering Dessert!");
+                    var dessertOrder = ChooseWhatToOrder(msg.Menu);
+                    Sender.Tell(new FoodOrder(dessertOrder, true));
+                }
+                else
+                {
+                    _logger.Info($"I don't like dessert");
+                    Sender.Tell(new RequestCheck());
+                }
+            });
+            Receive<RequestPayment>(msg =>
+            {
+                _logger.Info($"Here's our gold card!");
+                Sender.Tell(new Payment());
             });
         }
 

@@ -20,31 +20,33 @@ namespace Akka.Restaurant.Actors.Cooks
             }
 
             Receive<FoodOrder>(msg =>
-            { 
-                /*Cheeseburger, Lasgna*/
-                /*Cook1, Cook2*/
-                var tasks = new List<Task<CookStatusResponse>>();
+            {
                 var senderId = Guid.Parse(Sender.Path.Name.Remove(0, 7));
-                foreach(var child in Context.GetChildren())
+                foreach(var foodItem in msg.Order)
+                {
+                    Self.Tell(new CookTheFood(foodItem, msg.OrderId, senderId));       
+                }
+            });
+
+            Receive<CookTheFood>(msg =>
+            {
+                var tasks = new List<Task<CookStatusResponse>>();
+                foreach (var child in Context.GetChildren())
                 {
                     tasks.Add(child.Ask<CookStatusResponse>(new RequestCookStatus()));
                 }
+
+                // start to assign foods in separate messages
                 Task.WaitAll(tasks.ToArray());
-                foreach(var foodItem in msg.Order)
+                var cook = tasks.OrderBy(t => t.Result.CookStatus).ThenBy(t => t.Result.NumBacklogOrders).FirstOrDefault();
+                if (cook == null)
                 {
-                    var cook = tasks.OrderBy(t => t.Result.CookStatus).ThenBy(t => t.Result.NumBacklogOrders).FirstOrDefault();
-                    if (cook == null)
-                    {
-                        _loggerAdapter.Error($"Cook Manager couldn't find child cook");
-                        throw new Exception();
-                    }
-                    cook.Result.NumBacklogOrders++;
-                    var childCook = Context.Child($"cook-{cook.Result.CookId}");
-                    childCook.Tell(new CookTheFood(foodItem, msg.OrderId, senderId, Guid.NewGuid()));       
+                    _loggerAdapter.Error($"Cook Manager couldn't find children cook");
+                    throw new Exception();
                 }
+                var childCook = Context.Child($"cook-{cook.Result.CookId}");
+                childCook.Forward(msg);
             });
         }
-
-
     }
 }

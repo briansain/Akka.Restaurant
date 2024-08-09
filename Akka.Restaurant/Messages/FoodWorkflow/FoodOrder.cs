@@ -12,10 +12,12 @@ namespace Akka.Restaurant.Messages.FoodWorkflow
         public Guid OrderId { get; set; }
         public int CompletlyCookedFoods = 0;
         public Guid CustomerId { get; set; }
-        public FoodOrder(List<string> order)
+        public bool IsDessert { get; set; }
+        public FoodOrder(List<string> order, bool isDessert = false)
         {
             Order = order;
             OrderId = Guid.NewGuid();
+            IsDessert = isDessert;
         }
     }
 }

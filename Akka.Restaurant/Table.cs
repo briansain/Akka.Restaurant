@@ -9,12 +9,12 @@ namespace Akka.Restaurant
     internal class Table
     {
         public Guid TableId {get;set;}
-        public int NumberOfSeats { get; set; }
+        public int AvailableSeats { get; set; }
         public bool HasCustomers { get; set; }
 
         public Table(int seats) 
         {
-            NumberOfSeats = seats;
+            AvailableSeats = seats;
             HasCustomers = false;
             TableId = Guid.NewGuid();
         }

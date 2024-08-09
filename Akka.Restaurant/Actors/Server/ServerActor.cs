@@ -19,7 +19,9 @@ namespace Akka.Restaurant.Actors.Server
         {
             ServerName = serverName;
             _cookManager = cookManager;
-            Receive<NumAssignedTables>(msg =>
+            _logger = Context.GetLogger();
+
+			Receive<NumAssignedTables>(msg =>
             {
                 Sender.Tell(new NumAssignedTablesResponse(TableStates.Count, Self));
             });
@@ -33,15 +35,18 @@ namespace Akka.Restaurant.Actors.Server
             });
             Receive<DrinkOrder>(msg =>
             {
+                _logger.Info($"Received drink order");
                 Context.System.Scheduler.ScheduleTellOnce(TimeSpan.FromSeconds(3), Sender, new Drinks(), Self);
                 Context.System.Scheduler.ScheduleTellOnce(TimeSpan.FromSeconds(6), Sender, new RequestFoodOrder(), Self);
             });
             Receive<FoodOrder>(msg =>
-            {
-                _cookManager.ActorRef.Tell(msg);
-                var customerId = Guid.Parse(Sender.Path.Name.Remove(0, 9));
-                msg.CustomerId = customerId;
-                _foodOrders.Add(msg);
+			{
+                _logger.Info($"Received food order; Num items: {msg.Order.Count}");
+				var customerId = Guid.Parse(Sender.Path.Name.Remove(0, 9));
+				msg.CustomerId = customerId;
+				_foodOrders.Add(msg);
+
+				_cookManager.ActorRef.Tell(msg);
             });
             Receive<FoodIsCooked>(msg =>
             {
@@ -49,12 +54,26 @@ namespace Akka.Restaurant.Actors.Server
                 order.CompletlyCookedFoods++;
                 if (order.CompletlyCookedFoods == order.Order.Count)
                 {
+                    _logger.Info($"Delivering food to customers");
                     var customer = GetCustomerReference(order.CustomerId);
                     customer.Tell(new FoodOrderDelivery());
                     _foodOrders.Remove(order);
-                }
+
+                    object message = order.IsDessert ? new RequestPayment() : new RequestDessertOrder();
+
+					Context.System.Scheduler.ScheduleTellOnce(TimeSpan.FromSeconds(6), customer, message, Self);
+				}
+			});
+            Receive<RequestCheck>(msg =>
+            {
+                _logger.Info($"Requesting Check");
+                Sender.Tell(new RequestPayment());
             });
-            _logger = Context.GetLogger();
+            Receive<Payment>(msg =>
+            {
+                _logger.Info($"Received Payment!!");
+                Context.System.Scheduler.ScheduleTellOnce(TimeSpan.FromSeconds(6), Sender, PoisonPill.Instance, Self);
+            });
         }
 
         public ActorSelection GetCustomerReference(Guid customerId)
@@ -87,7 +106,7 @@ namespace Akka.Restaurant.Actors.Server
         FoodDelivery,
         DessertOrder,
         DessertDelivery,
-        Receipt, 
+        Check, 
         FullyPaid,
         CleanTable
     }

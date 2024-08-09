@@ -22,7 +22,7 @@ namespace Akka.Restaurant.Actors
             Receive<NewCustomers>(msg =>
             {
                 _logger.Debug($"Receive NewCustomers Message; Num of Customers:{msg.NumberOfCustomers}");
-                var availableTable = Tables!.First(t => t.NumberOfSeats >= msg.NumberOfCustomers && !t.HasCustomers);
+                var availableTable = Tables!.First(t => t.AvailableSeats >= msg.NumberOfCustomers && !t.HasCustomers);
                 _logger.Debug($"Assigned customers to table {availableTable.TableId}");
                 ServerManager!.ActorRef.Tell(new AssignTable(msg, availableTable.TableId));
                 availableTable.HasCustomers = true;
